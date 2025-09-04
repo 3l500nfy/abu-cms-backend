@@ -120,6 +120,50 @@ Route::get('/error-test', function () {
     }
 });
 
+Route::get('/db-status', function () {
+    try {
+        // Check if users table exists
+        $userCount = DB::table('users')->count();
+        $tableExists = Schema::hasTable('users');
+        
+        return response()->json([
+            'database_connected' => true,
+            'users_table_exists' => $tableExists,
+            'user_count' => $userCount,
+            'message' => $userCount > 0 ? 'Users found' : 'No users in database'
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'database_connected' => false,
+            'error' => $e->getMessage()
+        ]);
+    }
+});
+
+Route::get('/setup-db', function () {
+    try {
+        // Run migrations
+        Artisan::call('migrate', ['--force' => true]);
+        $migrationOutput = Artisan::output();
+        
+        // Run seeders
+        Artisan::call('db:seed', ['--force' => true]);
+        $seederOutput = Artisan::output();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Database setup completed',
+            'migrations' => $migrationOutput,
+            'seeders' => $seederOutput
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage()
+        ]);
+    }
+});
+
 Route::get('/debug', function () {
     return response()->json([
         'php_version' => PHP_VERSION,
