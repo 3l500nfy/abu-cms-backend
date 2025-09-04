@@ -245,6 +245,72 @@ Route::get('/setup-roles', function () {
     }
 });
 
+Route::get('/setup-departments', function () {
+    try {
+        // Check if departments table exists
+        if (!Schema::hasTable('departments')) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Departments table does not exist'
+            ]);
+        }
+        
+        // Create sample departments
+        $departments = [
+            [
+                'name' => 'Computer Science',
+                'display_name' => 'Department of Computer Science',
+                'description' => 'Handles computer science related complaints',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'name' => 'Electrical Engineering',
+                'display_name' => 'Department of Electrical Engineering',
+                'description' => 'Handles electrical engineering complaints',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'name' => 'Mechanical Engineering',
+                'display_name' => 'Department of Mechanical Engineering',
+                'description' => 'Handles mechanical engineering complaints',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'name' => 'General Administration',
+                'display_name' => 'General Administration',
+                'description' => 'Handles general administrative complaints',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]
+        ];
+        
+        // Insert departments
+        foreach ($departments as $dept) {
+            DB::table('departments')->insertOrIgnore($dept);
+        }
+        
+        $deptCount = DB::table('departments')->count();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Departments created successfully',
+            'departments_count' => $deptCount
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage()
+        ]);
+    }
+});
+
 Route::get('/debug', function () {
     return response()->json([
         'php_version' => PHP_VERSION,
