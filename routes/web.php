@@ -54,6 +54,22 @@ Route::get('/health', function () {
     return response()->json(['status' => 'ok', 'message' => 'ABU CMS Backend is running']);
 });
 
+Route::get('/test', function () {
+    return 'Simple test route working!';
+});
+
+Route::get('/debug', function () {
+    return response()->json([
+        'php_version' => PHP_VERSION,
+        'laravel_version' => app()->version(),
+        'app_env' => config('app.env'),
+        'app_debug' => config('app.debug'),
+        'app_key_set' => !empty(config('app.key')),
+        'database_connection' => config('database.default'),
+        'time' => now()->toISOString()
+    ]);
+});
+
 Route::get('/', function () {
     try {
         return redirect('/admin/login');
