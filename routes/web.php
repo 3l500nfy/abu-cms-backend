@@ -433,6 +433,36 @@ Route::get('/fix-departments', function () {
     }
 });
 
+Route::get('/check-complaints-table', function () {
+    try {
+        // Check if complaints table exists
+        if (!Schema::hasTable('complaints')) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Complaints table does not exist'
+            ]);
+        }
+        
+        // Get actual table structure
+        $columns = DB::select("SELECT column_name, data_type, is_nullable, column_default FROM information_schema.columns WHERE table_name = 'complaints' ORDER BY ordinal_position");
+        
+        // Check current complaints count
+        $complaintCount = DB::table('complaints')->count();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Complaints table structure',
+            'columns' => $columns,
+            'current_complaints_count' => $complaintCount
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage()
+        ]);
+    }
+});
+
 Route::get('/setup-complete-system', function () {
     try {
         // 1. Setup Complaint Categories
