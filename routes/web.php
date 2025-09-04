@@ -255,11 +255,36 @@ Route::get('/setup-departments', function () {
             ]);
         }
         
-        // Create sample departments
+        // Get actual table structure
+        $columns = DB::select("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'departments'");
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Departments table structure',
+            'columns' => $columns
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage()
+        ]);
+    }
+});
+
+Route::get('/create-departments', function () {
+    try {
+        // Check if departments table exists
+        if (!Schema::hasTable('departments')) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Departments table does not exist'
+            ]);
+        }
+        
+        // Create sample departments with minimal fields
         $departments = [
             [
                 'name' => 'Computer Science',
-                'display_name' => 'Department of Computer Science',
                 'description' => 'Handles computer science related complaints',
                 'is_active' => true,
                 'created_at' => now(),
@@ -267,7 +292,6 @@ Route::get('/setup-departments', function () {
             ],
             [
                 'name' => 'Electrical Engineering',
-                'display_name' => 'Department of Electrical Engineering',
                 'description' => 'Handles electrical engineering complaints',
                 'is_active' => true,
                 'created_at' => now(),
@@ -275,7 +299,6 @@ Route::get('/setup-departments', function () {
             ],
             [
                 'name' => 'Mechanical Engineering',
-                'display_name' => 'Department of Mechanical Engineering',
                 'description' => 'Handles mechanical engineering complaints',
                 'is_active' => true,
                 'created_at' => now(),
@@ -283,7 +306,6 @@ Route::get('/setup-departments', function () {
             ],
             [
                 'name' => 'General Administration',
-                'display_name' => 'General Administration',
                 'description' => 'Handles general administrative complaints',
                 'is_active' => true,
                 'created_at' => now(),
