@@ -345,6 +345,94 @@ Route::get('/create-departments', function () {
     }
 });
 
+Route::get('/fix-departments', function () {
+    try {
+        // Check if departments table exists
+        if (!Schema::hasTable('departments')) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Departments table does not exist'
+            ]);
+        }
+        
+        // Check current departments
+        $existingDepts = DB::table('departments')->get();
+        
+        // Create sample departments with correct columns
+        $departments = [
+            [
+                'name' => 'Computer Science',
+                'code' => 'CS',
+                'description' => 'Handles computer science related complaints',
+                'email' => 'cs@abu.edu.ng',
+                'phone' => '08012345678',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'name' => 'Electrical Engineering',
+                'code' => 'EE',
+                'description' => 'Handles electrical engineering complaints',
+                'email' => 'ee@abu.edu.ng',
+                'phone' => '08012345679',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'name' => 'Mechanical Engineering',
+                'code' => 'ME',
+                'description' => 'Handles mechanical engineering complaints',
+                'email' => 'me@abu.edu.ng',
+                'phone' => '08012345680',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'name' => 'General Administration',
+                'code' => 'GA',
+                'description' => 'Handles general administrative complaints',
+                'email' => 'admin@abu.edu.ng',
+                'phone' => '08012345681',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]
+        ];
+        
+        // Insert departments
+        $inserted = 0;
+        foreach ($departments as $dept) {
+            try {
+                DB::table('departments')->insertOrIgnore($dept);
+                $inserted++;
+            } catch (Exception $e) {
+                // Log the error but continue
+                error_log("Failed to insert department: " . $e->getMessage());
+            }
+        }
+        
+        $deptCount = DB::table('departments')->count();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Departments fix completed',
+            'existing_departments' => $existingDepts,
+            'departments_inserted' => $inserted,
+            'total_departments' => $deptCount,
+            'departments' => DB::table('departments')->get()
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+    }
+});
+
 Route::get('/setup-complete-system', function () {
     try {
         // 1. Setup Complaint Categories
