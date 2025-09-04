@@ -17,8 +17,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     && docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip
 
-# Install additional tools
-RUN apt-get install -y timeout
+# Install additional tools (timeout is not available in base image)
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
