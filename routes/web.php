@@ -67,6 +67,22 @@ Route::get('/ping', function () {
     ]);
 });
 
+Route::get('/status', function () {
+    return response()->json([
+        'server' => 'ABU CMS Backend',
+        'status' => 'running',
+        'php_version' => PHP_VERSION,
+        'laravel_version' => app()->version(),
+        'timestamp' => now()->toISOString(),
+        'database' => [
+            'connection' => config('database.default'),
+            'host' => config('database.connections.pgsql.host'),
+            'database' => config('database.connections.pgsql.database'),
+            'port' => config('database.connections.pgsql.port')
+        ]
+    ]);
+});
+
 Route::get('/debug', function () {
     return response()->json([
         'php_version' => PHP_VERSION,

@@ -6,14 +6,20 @@ sleep 10
 
 # Test database connection
 echo "Testing database connection..."
-php artisan tinker --execute="DB::connection()->getPdo(); echo 'Database connection successful';" || echo "Database connection failed, continuing anyway..."
+DB_CONNECTED=false
+if php artisan tinker --execute="DB::connection()->getPdo(); echo 'Database connection successful';" 2>/dev/null; then
+    echo "Database connection successful"
+    DB_CONNECTED=true
+else
+    echo "Database connection failed, continuing without database operations"
+    DB_CONNECTED=false
+fi
 
-# Clear Laravel caches (without database)
+# Clear Laravel caches (without database dependency)
 echo "Clearing Laravel caches..."
-php artisan config:clear || echo "Config clear failed"
-php artisan route:clear || echo "Route clear failed"
-php artisan view:clear || echo "View clear failed"
-php artisan cache:clear || echo "Cache clear failed"
+php artisan config:clear --no-interaction || echo "Config clear failed"
+php artisan route:clear --no-interaction || echo "Route clear failed"
+php artisan view:clear --no-interaction || echo "View clear failed"
 
 # Generate app key if not set
 if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "" ]; then
@@ -21,9 +27,13 @@ if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "" ]; then
     php artisan key:generate
 fi
 
-# Run migrations
-echo "Running database migrations..."
-php artisan migrate --force
+# Run migrations only if database is connected
+if [ "$DB_CONNECTED" = true ]; then
+    echo "Running database migrations..."
+    php artisan migrate --force --no-interaction || echo "Migrations failed"
+else
+    echo "Skipping migrations - database not connected"
+fi
 
 # Start Apache
 echo "Starting Apache..."
