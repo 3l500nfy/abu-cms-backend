@@ -281,32 +281,44 @@ Route::get('/create-departments', function () {
             ]);
         }
         
-        // Create sample departments with minimal fields
+        // Create sample departments with correct columns
         $departments = [
             [
                 'name' => 'Computer Science',
+                'code' => 'CS',
                 'description' => 'Handles computer science related complaints',
+                'email' => 'cs@abu.edu.ng',
+                'phone' => '08012345678',
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now()
             ],
             [
                 'name' => 'Electrical Engineering',
+                'code' => 'EE',
                 'description' => 'Handles electrical engineering complaints',
+                'email' => 'ee@abu.edu.ng',
+                'phone' => '08012345679',
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now()
             ],
             [
                 'name' => 'Mechanical Engineering',
+                'code' => 'ME',
                 'description' => 'Handles mechanical engineering complaints',
+                'email' => 'me@abu.edu.ng',
+                'phone' => '08012345680',
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now()
             ],
             [
                 'name' => 'General Administration',
+                'code' => 'GA',
                 'description' => 'Handles general administrative complaints',
+                'email' => 'admin@abu.edu.ng',
+                'phone' => '08012345681',
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now()
@@ -329,6 +341,286 @@ Route::get('/create-departments', function () {
         return response()->json([
             'success' => false,
             'error' => $e->getMessage()
+        ]);
+    }
+});
+
+Route::get('/setup-complete-system', function () {
+    try {
+        // 1. Setup Complaint Categories
+        if (Schema::hasTable('complaint_categories')) {
+            $categories = [
+                [
+                    'name' => 'academic',
+                    'display_name' => 'Academic Issues',
+                    'description' => 'Complaints related to academic matters',
+                    'color' => '#3B82F6',
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ],
+                [
+                    'name' => 'facility',
+                    'display_name' => 'Facility Problems',
+                    'description' => 'Complaints about campus facilities',
+                    'color' => '#EF4444',
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ],
+                [
+                    'name' => 'administrative',
+                    'display_name' => 'Administrative Issues',
+                    'description' => 'Complaints about administrative processes',
+                    'color' => '#10B981',
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ],
+                [
+                    'name' => 'technical',
+                    'display_name' => 'Technical Problems',
+                    'description' => 'IT and technical related complaints',
+                    'color' => '#F59E0B',
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]
+            ];
+            
+            foreach ($categories as $cat) {
+                DB::table('complaint_categories')->insertOrIgnore($cat);
+            }
+        }
+        
+        // 2. Setup Complaint Statuses
+        if (Schema::hasTable('complaint_statuses')) {
+            $statuses = [
+                [
+                    'name' => 'pending',
+                    'display_name' => 'Pending',
+                    'description' => 'Complaint is waiting for review',
+                    'color' => '#F59E0B',
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ],
+                [
+                    'name' => 'in_progress',
+                    'display_name' => 'In Progress',
+                    'description' => 'Complaint is being processed',
+                    'color' => '#3B82F6',
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ],
+                [
+                    'name' => 'resolved',
+                    'display_name' => 'Resolved',
+                    'description' => 'Complaint has been resolved',
+                    'color' => '#10B981',
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ],
+                [
+                    'name' => 'rejected',
+                    'display_name' => 'Rejected',
+                    'description' => 'Complaint has been rejected',
+                    'color' => '#EF4444',
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]
+            ];
+            
+            foreach ($statuses as $status) {
+                DB::table('complaint_statuses')->insertOrIgnore($status);
+            }
+        }
+        
+        // 3. Create Sample Students
+        if (Schema::hasTable('users') && Schema::hasTable('roles')) {
+            $studentRole = DB::table('roles')->where('name', 'user')->first();
+            if ($studentRole) {
+                $students = [
+                    [
+                        'name' => 'John Doe',
+                        'email' => 'john.doe@student.abu.edu.ng',
+                        'password' => Hash::make('student123'),
+                        'role_id' => $studentRole->id,
+                        'student_id' => 'STU001',
+                        'department' => 'Computer Science',
+                        'phone' => '08012345690',
+                        'address' => 'Student Hostel A, Room 101',
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ],
+                    [
+                        'name' => 'Jane Smith',
+                        'email' => 'jane.smith@student.abu.edu.ng',
+                        'password' => Hash::make('student123'),
+                        'role_id' => $studentRole->id,
+                        'student_id' => 'STU002',
+                        'department' => 'Electrical Engineering',
+                        'phone' => '08012345691',
+                        'address' => 'Student Hostel B, Room 205',
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ],
+                    [
+                        'name' => 'Mike Johnson',
+                        'email' => 'mike.johnson@student.abu.edu.ng',
+                        'password' => Hash::make('student123'),
+                        'role_id' => $studentRole->id,
+                        'student_id' => 'STU003',
+                        'department' => 'Mechanical Engineering',
+                        'phone' => '08012345692',
+                        'address' => 'Student Hostel C, Room 310',
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]
+                ];
+                
+                foreach ($students as $student) {
+                    DB::table('users')->insertOrIgnore($student);
+                }
+            }
+        }
+        
+        // 4. Create Sample Staff Members
+        if (Schema::hasTable('users') && Schema::hasTable('roles') && Schema::hasTable('departments') && Schema::hasTable('staff')) {
+            $staffRole = DB::table('roles')->where('name', 'staff')->first();
+            $csDept = DB::table('departments')->where('code', 'CS')->first();
+            $eeDept = DB::table('departments')->where('code', 'EE')->first();
+            
+            if ($staffRole && $csDept && $eeDept) {
+                // Create staff users
+                $staffUsers = [
+                    [
+                        'name' => 'Dr. Sarah Wilson',
+                        'email' => 'sarah.wilson@abu.edu.ng',
+                        'password' => Hash::make('staff123'),
+                        'role_id' => $staffRole->id,
+                        'phone' => '08012345670',
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ],
+                    [
+                        'name' => 'Prof. David Brown',
+                        'email' => 'david.brown@abu.edu.ng',
+                        'password' => Hash::make('staff123'),
+                        'role_id' => $staffRole->id,
+                        'phone' => '08012345671',
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]
+                ];
+                
+                foreach ($staffUsers as $staffUser) {
+                    $userId = DB::table('users')->insertGetId($staffUser);
+                    
+                    // Create staff records
+                    if ($staffUser['name'] === 'Dr. Sarah Wilson') {
+                        DB::table('staff')->insertOrIgnore([
+                            'user_id' => $userId,
+                            'department_id' => $csDept->id,
+                            'position' => 'Head of Department',
+                            'employee_id' => 'STAFF001',
+                            'is_active' => true,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]);
+                    } else {
+                        DB::table('staff')->insertOrIgnore([
+                            'user_id' => $userId,
+                            'department_id' => $eeDept->id,
+                            'position' => 'Lecturer',
+                            'employee_id' => 'STAFF002',
+                            'is_active' => true,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]);
+                    }
+                }
+            }
+        }
+        
+        // 5. Create Sample Complaints
+        if (Schema::hasTable('complaints') && Schema::hasTable('users') && Schema::hasTable('complaint_categories') && Schema::hasTable('complaint_statuses')) {
+            $studentUser = DB::table('users')->where('email', 'john.doe@student.abu.edu.ng')->first();
+            $csDept = DB::table('departments')->where('code', 'CS')->first();
+            $academicCategory = DB::table('complaint_categories')->where('name', 'academic')->first();
+            $pendingStatus = DB::table('complaint_statuses')->where('name', 'pending')->first();
+            
+            if ($studentUser && $csDept && $academicCategory && $pendingStatus) {
+                $complaints = [
+                    [
+                        'user_id' => $studentUser->id,
+                        'category_id' => $academicCategory->id,
+                        'status_id' => $pendingStatus->id,
+                        'department_id' => $csDept->id,
+                        'title' => 'Late Assignment Submission',
+                        'description' => 'I was unable to submit my programming assignment on time due to technical issues with the submission portal. The system was down for maintenance during the submission period.',
+                        'location' => 'Computer Science Department',
+                        'priority' => 'medium',
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ],
+                    [
+                        'user_id' => $studentUser->id,
+                        'category_id' => $academicCategory->id,
+                        'status_id' => $pendingStatus->id,
+                        'department_id' => $csDept->id,
+                        'title' => 'Course Registration Problem',
+                        'description' => 'I am unable to register for CS401 Advanced Programming course. The system shows the course is full but I have all prerequisites completed.',
+                        'location' => 'Academic Affairs Office',
+                        'priority' => 'high',
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]
+                ];
+                
+                foreach ($complaints as $complaint) {
+                    DB::table('complaints')->insertOrIgnore($complaint);
+                }
+            }
+        }
+        
+        // Get counts
+        $deptCount = DB::table('departments')->count();
+        $categoryCount = DB::table('complaint_categories')->count();
+        $statusCount = DB::table('complaint_statuses')->count();
+        $studentCount = DB::table('users')->where('role_id', DB::table('roles')->where('name', 'user')->value('id'))->count();
+        $staffCount = DB::table('users')->where('role_id', DB::table('roles')->where('name', 'staff')->value('id'))->count();
+        $complaintCount = DB::table('complaints')->count();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Complete system setup completed successfully!',
+            'summary' => [
+                'departments' => $deptCount,
+                'complaint_categories' => $categoryCount,
+                'complaint_statuses' => $statusCount,
+                'students' => $studentCount,
+                'staff' => $staffCount,
+                'complaints' => $complaintCount
+            ],
+            'login_credentials' => [
+                'admin' => 'admin@abu.edu.ng / admin123',
+                'students' => [
+                    'john.doe@student.abu.edu.ng / student123',
+                    'jane.smith@student.abu.edu.ng / student123',
+                    'mike.johnson@student.abu.edu.ng / student123'
+                ],
+                'staff' => [
+                    'sarah.wilson@abu.edu.ng / staff123',
+                    'david.brown@abu.edu.ng / staff123'
+                ]
+            ]
+        ]);
+        
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
         ]);
     }
 });
