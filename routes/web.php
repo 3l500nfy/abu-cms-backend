@@ -463,6 +463,153 @@ Route::get('/check-complaints-table', function () {
     }
 });
 
+Route::get('/create-database-tables', function () {
+    try {
+        // Drop existing tables if they exist (to recreate with correct structure)
+        Schema::dropIfExists('complaints');
+        Schema::dropIfExists('attachments');
+        Schema::dropIfExists('feedback');
+        Schema::dropIfExists('staff');
+        Schema::dropIfExists('users');
+        Schema::dropIfExists('departments');
+        Schema::dropIfExists('complaint_categories');
+        Schema::dropIfExists('complaint_statuses');
+        Schema::dropIfExists('roles');
+        
+        // 1. Create roles table
+        Schema::create('roles', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->string('display_name');
+            $table->text('description')->nullable();
+            $table->timestamps();
+        });
+        
+        // 2. Create users table
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->foreignId('role_id')->constrained('roles');
+            $table->string('student_id')->nullable();
+            $table->string('department')->nullable();
+            $table->string('phone')->nullable();
+            $table->text('address')->nullable();
+            $table->rememberToken();
+            $table->timestamps();
+        });
+        
+        // 3. Create departments table
+        Schema::create('departments', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('code', 10)->unique();
+            $table->text('description')->nullable();
+            $table->string('email')->nullable();
+            $table->string('phone')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+        
+        // 4. Create complaint_categories table
+        Schema::create('complaint_categories', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->string('display_name');
+            $table->text('description')->nullable();
+            $table->string('color')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+        
+        // 5. Create complaint_statuses table
+        Schema::create('complaint_statuses', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->string('display_name');
+            $table->text('description')->nullable();
+            $table->string('color')->nullable();
+            $table->timestamps();
+        });
+        
+        // 6. Create complaints table with ALL required columns
+        Schema::create('complaints', function (Blueprint $table) {
+            $table->id();
+            $table->string('complaint_id')->unique();
+            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('category_id')->constrained('complaint_categories');
+            $table->foreignId('status_id')->constrained('complaint_statuses');
+            $table->foreignId('department_id')->nullable()->constrained('departments');
+            $table->foreignId('assigned_to')->nullable()->constrained('users');
+            $table->string('title');
+            $table->text('description');
+            $table->string('location')->nullable();
+            $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
+            $table->timestamp('resolved_at')->nullable();
+            $table->text('resolution_notes')->nullable();
+            $table->timestamps();
+        });
+        
+        // 7. Create staff table
+        Schema::create('staff', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('department_id')->constrained('departments');
+            $table->string('position');
+            $table->string('employee_id')->unique();
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+        
+        // 8. Create attachments table
+        Schema::create('attachments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('complaint_id')->constrained('complaints');
+            $table->string('filename');
+            $table->string('original_filename');
+            $table->string('mime_type');
+            $table->string('file_path');
+            $table->integer('file_size');
+            $table->timestamps();
+        });
+        
+        // 9. Create feedback table
+        Schema::create('feedback', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('complaint_id')->constrained('complaints');
+            $table->foreignId('user_id')->constrained('users');
+            $table->text('message');
+            $table->integer('rating')->nullable();
+            $table->timestamps();
+        });
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Database tables created successfully with correct structure',
+            'tables_created' => [
+                'roles',
+                'users', 
+                'departments',
+                'complaint_categories',
+                'complaint_statuses',
+                'complaints',
+                'staff',
+                'attachments',
+                'feedback'
+            ]
+        ]);
+        
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+    }
+});
+
 Route::get('/setup-complete-system', function () {
     try {
         // 1. Setup Complaint Categories
