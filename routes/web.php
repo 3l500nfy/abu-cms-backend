@@ -126,10 +126,16 @@ Route::get('/db-status', function () {
         $userCount = DB::table('users')->count();
         $tableExists = Schema::hasTable('users');
         
+        // Check other important tables
+        $rolesTable = Schema::hasTable('roles');
+        $rolesCount = $rolesTable ? DB::table('roles')->count() : 0;
+        
         return response()->json([
             'database_connected' => true,
             'users_table_exists' => $tableExists,
             'user_count' => $userCount,
+            'roles_table_exists' => $rolesTable,
+            'roles_count' => $rolesCount,
             'message' => $userCount > 0 ? 'Users found' : 'No users in database'
         ]);
     } catch (Exception $e) {
@@ -188,6 +194,48 @@ Route::get('/create-admin', function () {
             'success' => true,
             'message' => 'Admin user created successfully',
             'user' => 'admin@abu.edu.ng / admin123'
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage()
+        ]);
+    }
+});
+
+Route::get('/setup-roles', function () {
+    try {
+        // Check if roles table exists
+        if (!Schema::hasTable('roles')) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Roles table does not exist'
+            ]);
+        }
+        
+        // Create basic roles
+        $roles = [
+            ['name' => 'admin', 'display_name' => 'Administrator', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'staff', 'display_name' => 'Staff Member', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'user', 'display_name' => 'Regular User', 'created_at' => now(), 'updated_at' => now()]
+        ];
+        
+        // Insert roles
+        foreach ($roles as $role) {
+            DB::table('roles')->insertOrIgnore($role);
+        }
+        
+        // Get role IDs
+        $adminRole = DB::table('roles')->where('name', 'admin')->first();
+        $staffRole = DB::table('roles')->where('name', 'staff')->first();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Roles created successfully',
+            'roles' => [
+                'admin' => $adminRole ? $adminRole->id : 'Not found',
+                'staff' => $staffRole ? $staffRole->id : 'Not found'
+            ]
         ]);
     } catch (Exception $e) {
         return response()->json([
