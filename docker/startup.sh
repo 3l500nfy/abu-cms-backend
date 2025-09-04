@@ -7,7 +7,9 @@ sleep 10
 # Test database connection
 echo "Testing database connection..."
 DB_CONNECTED=false
-if php artisan tinker --execute="DB::connection()->getPdo(); echo 'Database connection successful';" 2>/dev/null; then
+
+# Try to connect to database
+if timeout 10 php artisan tinker --execute="try { DB::connection()->getPdo(); echo 'Database connection successful'; } catch (Exception \$e) { echo 'Database connection failed: ' . \$e->getMessage(); exit(1); }" 2>/dev/null; then
     echo "Database connection successful"
     DB_CONNECTED=true
 else

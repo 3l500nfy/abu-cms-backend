@@ -62,7 +62,7 @@ Route::get('/ping', function () {
     return response()->json([
         'status' => 'ok',
         'message' => 'Server is responding',
-        'timestamp' => now()->toISOString(),
+        'timestamp' => date('c'),
         'php_version' => PHP_VERSION
     ]);
 });
@@ -72,8 +72,7 @@ Route::get('/status', function () {
         'server' => 'ABU CMS Backend',
         'status' => 'running',
         'php_version' => PHP_VERSION,
-        'laravel_version' => app()->version(),
-        'timestamp' => now()->toISOString(),
+        'timestamp' => date('c'),
         'database' => [
             'connection' => config('database.default'),
             'host' => config('database.connections.pgsql.host'),
@@ -81,6 +80,22 @@ Route::get('/status', function () {
             'port' => config('database.connections.pgsql.port')
         ]
     ]);
+});
+
+Route::get('/simple', function () {
+    return 'This route works without any Laravel dependencies!';
+});
+
+Route::get('/raw', function () {
+    // Bypass Laravel completely
+    header('Content-Type: application/json');
+    echo json_encode([
+        'message' => 'Raw PHP response',
+        'php_version' => PHP_VERSION,
+        'time' => date('c'),
+        'server' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown'
+    ]);
+    exit;
 });
 
 Route::get('/debug', function () {
