@@ -98,6 +98,28 @@ Route::get('/raw', function () {
     exit;
 });
 
+Route::get('/phpinfo', function () {
+    // Show PHP info without Laravel
+    phpinfo();
+    exit;
+});
+
+Route::get('/check', function () {
+    // Simple health check
+    return 'PHP is working!';
+});
+
+Route::get('/error-test', function () {
+    try {
+        // Try to access Laravel services
+        $app = app();
+        $config = config('app.name');
+        return "Laravel is working! App name: " . ($config ?? 'Not set');
+    } catch (Exception $e) {
+        return "Laravel error: " . $e->getMessage();
+    }
+});
+
 Route::get('/debug', function () {
     return response()->json([
         'php_version' => PHP_VERSION,
