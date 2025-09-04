@@ -50,6 +50,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/department/logout', [App\Http\Controllers\Department\DashboardController::class, 'logout'])->name('department.logout');
 });
 
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok', 'message' => 'ABU CMS Backend is running']);
+});
+
 Route::get('/', function () {
-    return redirect('/admin/login');
+    try {
+        return redirect('/admin/login');
+    } catch (\Exception $e) {
+        return response('ABU CMS Backend is running. <a href="/admin/login">Go to Admin Login</a>', 200);
+    }
 });
