@@ -142,19 +142,52 @@ Route::get('/db-status', function () {
 
 Route::get('/setup-db', function () {
     try {
+        // Check if we can run artisan commands
+        if (!class_exists('Artisan')) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Artisan class not available'
+            ]);
+        }
+        
         // Run migrations
-        Artisan::call('migrate', ['--force' => true]);
-        $migrationOutput = Artisan::output();
+        $migrationResult = Artisan::call('migrate', ['--force' => true]);
         
         // Run seeders
-        Artisan::call('db:seed', ['--force' => true]);
-        $seederOutput = Artisan::output();
+        $seederResult = Artisan::call('db:seed', ['--force' => true]);
         
         return response()->json([
             'success' => true,
             'message' => 'Database setup completed',
-            'migrations' => $migrationOutput,
-            'seeders' => $seederOutput
+            'migration_result' => $migrationResult,
+            'seeder_result' => $seederResult
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+    }
+});
+
+Route::get('/create-admin', function () {
+    try {
+        // Create admin user manually
+        $adminUser = DB::table('users')->insert([
+            'name' => 'Admin User',
+            'email' => 'admin@abu.edu.ng',
+            'password' => Hash::make('admin123'),
+            'role_id' => 1, // Assuming admin role ID is 1
+            'phone' => '1234567890',
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Admin user created successfully',
+            'user' => 'admin@abu.edu.ng / admin123'
         ]);
     } catch (Exception $e) {
         return response()->json([
