@@ -58,6 +58,15 @@ Route::get('/test', function () {
     return 'Simple test route working!';
 });
 
+Route::get('/ping', function () {
+    return response()->json([
+        'status' => 'ok',
+        'message' => 'Server is responding',
+        'timestamp' => now()->toISOString(),
+        'php_version' => PHP_VERSION
+    ]);
+});
+
 Route::get('/debug', function () {
     return response()->json([
         'php_version' => PHP_VERSION,

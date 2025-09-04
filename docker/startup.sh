@@ -4,12 +4,16 @@
 echo "Waiting for database connection..."
 sleep 10
 
-# Clear Laravel caches
+# Test database connection
+echo "Testing database connection..."
+php artisan tinker --execute="DB::connection()->getPdo(); echo 'Database connection successful';" || echo "Database connection failed, continuing anyway..."
+
+# Clear Laravel caches (without database)
 echo "Clearing Laravel caches..."
-php artisan config:clear
-php artisan route:clear
-php artisan view:clear
-php artisan cache:clear
+php artisan config:clear || echo "Config clear failed"
+php artisan route:clear || echo "Route clear failed"
+php artisan view:clear || echo "View clear failed"
+php artisan cache:clear || echo "Cache clear failed"
 
 # Generate app key if not set
 if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "" ]; then
